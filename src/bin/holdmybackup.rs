@@ -65,7 +65,7 @@ async fn main() -> std::io::Result<()> {
     .unwrap();
 
     watcher
-        .watch(Path::new("./config.yaml"), RecursiveMode::Recursive)
+        .watch(Path::new("./config.yaml"), RecursiveMode::NonRecursive)
         .unwrap();
 
     let http_server = {

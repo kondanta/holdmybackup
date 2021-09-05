@@ -1,3 +1,5 @@
+use notify::event::AccessKind;
+
 use {
     holdmybackup::config::Config,
     hyper::{
@@ -8,7 +10,7 @@ use {
         StatusCode,
     },
     notify::{
-        event::ModifyKind,
+        event::AccessMode,
         Error,
         Event,
         RecursiveMode,
@@ -23,14 +25,8 @@ use {
     },
 };
 
-async fn shutdown_signal() {
-    tokio::signal::ctrl_c()
-        .await
-        .expect("failed to install ctrl+c signal handler");
-}
-
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> anyhow::Result<()> {
     let cfg = Arc::new(Mutex::new(
         Config::load_config().expect("Cannot parse the config"),
     ));
@@ -43,15 +39,17 @@ async fn main() -> std::io::Result<()> {
                 // TODO(taylan): Print event with debug.
                 // println!("Event: {:#?}", &e);
                 if e.kind ==
-                    notify::EventKind::Modify(ModifyKind::Data(
-                        notify::event::DataChange::Any,
+                    notify::EventKind::Access(AccessKind::Close(
+                        AccessMode::Write,
                     ))
                 {
                     match Config::load_config() {
                         Ok(new_config) => {
                             // TODO(taylan): Print this event with
                             // println!("{:#?}", &new_config);
-                            *cloned_config.lock().unwrap() = new_config
+                            *cloned_config
+                                .lock()
+                                .expect("Cannot acquire the lock.") = new_config
                         }
                         Err(e) => println!("Error reloading config: {:#?}", e),
                     }
@@ -61,12 +59,11 @@ async fn main() -> std::io::Result<()> {
             // tracing::error!.
             Err(e) => println!("Error loading config: {:#?}", e),
         },
-    )
-    .unwrap();
-
+    )?;
+    watcher.configure(notify::Config::NoticeEvents(true))?;
     watcher
-        .watch(Path::new("./config.yaml"), RecursiveMode::NonRecursive)
-        .unwrap();
+        .watch(Path::new("config.yaml"), RecursiveMode::Recursive)
+        .map_err(|e| anyhow::anyhow!("Cannot listen to file {:#?}", e))?;
 
     let http_server = {
         let cfg = cfg.clone();
@@ -88,6 +85,12 @@ async fn main() -> std::io::Result<()> {
         .expect("failed to start http server");
 
     Ok(())
+}
+
+async fn shutdown_signal() {
+    tokio::signal::ctrl_c()
+        .await
+        .expect("failed to install ctrl+c signal handler");
 }
 
 async fn router(

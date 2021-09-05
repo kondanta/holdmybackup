@@ -1,6 +1,6 @@
 ---
 storage:
-  backup_path: "backus"
+  backup_path: "backups"
   minio:
     access_key: "ehe"
     secret_key: "ehe"

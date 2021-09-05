@@ -1,0 +1,9 @@
+---
+storage:
+  backup_path: "backus"
+  minio:
+    access_key: "ehe"
+    secret_key: "ehe"
+backup:
+  strategy: "KeepEverything"
+  backup_path: ["."]

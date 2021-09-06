@@ -1,5 +1,8 @@
 use {
-    holdmybackup::config::config_file::Config,
+    holdmybackup::config::{
+        args::Opt,
+        config_file::Config,
+    },
     holdmybackup::http,
     holdmybackup::log,
     std::sync::{
@@ -13,8 +16,8 @@ async fn main() -> anyhow::Result<()> {
     let cfg = Arc::new(Mutex::new(
         Config::load_config().expect("Cannot parse the config"),
     ));
+    let args = Opt::args();
     let cloned_config = Arc::clone(&cfg);
-    let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 9090));
 
     match Config::watch_config_changes(cloned_config) {
         Ok(()) => tracing::debug!("Config loaded"),
@@ -27,6 +30,12 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let http_server = {
+        let addr = args.address.parse().unwrap_or_else(|_| {
+            tracing::error!(
+                "Cannot parse the http address string. Using the default value",
+            );
+            std::net::SocketAddr::from(([127, 0, 0, 1], 9090))
+        });
         let cfg = cfg.clone();
         let service = hyper::service::make_service_fn(move |_| {
             let cfg = cfg.clone();

@@ -7,3 +7,12 @@ pub struct Opt {
     #[structopt(long, default_value = "127.0.0.1:9090")]
     pub address: String,
 }
+
+impl Opt {
+    pub fn args() -> Self
+    where
+        Self: Sized,
+    {
+        Opt::from_args()
+    }
+}

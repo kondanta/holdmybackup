@@ -85,7 +85,6 @@ impl ObjectStorage for MinioStore {
     }
 
     async fn upload(&self) -> anyhow::Result<()> {
-        // path = src, p => tries to open Folder.
         for path in &self.backup_paths {
             let folder_name = path.split('/').last().unwrap_or("");
             let file_name = format!("{}.tar.gz", folder_name);

@@ -5,7 +5,6 @@ use {
     },
     holdmybackup::http,
     holdmybackup::log,
-    holdmybackup::storage::minio::MinioStore,
     std::sync::{
         Arc,
         Mutex,
@@ -43,17 +42,7 @@ async fn main() -> anyhow::Result<()> {
             async move {
                 Ok::<_, hyper::Error>(hyper::service::service_fn(move |req| {
                     let cfg = cfg.clone();
-                    let store = match MinioStore::init(cfg.clone()) {
-                        Ok(s) => s,
-                        Err(e) => {
-                            anyhow::anyhow!(
-                                "Cannot init object store: {:#?}",
-                                e
-                            );
-                            std::process::exit(1);
-                        }
-                    };
-                    http::router(req, cfg, store)
+                    http::router(req, cfg /* store */)
                 }))
             }
         });

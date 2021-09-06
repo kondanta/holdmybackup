@@ -23,8 +23,9 @@ pub struct MinioStore {
 // TODO(taylan): Implementing Get and List will be useful when it comes to
 // writing a client. Currently I am not bothered with implementing them because
 // they won't add any value.
-impl MinioStore {
-    pub fn init(cfg: Arc<Mutex<Config>>) -> Result<Self> {
+#[async_trait]
+impl ObjectStorage for MinioStore {
+    fn init(cfg: Arc<Mutex<Config>>) -> Result<Self> {
         let storage = cfg.lock().unwrap().storage.clone();
         let backup = cfg.lock().unwrap().backup.clone();
         match storage.minio {
@@ -53,18 +54,6 @@ impl MinioStore {
         }
     }
 
-    async fn is_bucket_exists(&self) -> Result<bool> {
-        let (_, response_code) =
-            self.bucket.head_object(self.bucket.name.as_str()).await?;
-        if response_code == 404 {
-            return Ok(false);
-        }
-        Ok(true)
-    }
-}
-
-#[async_trait]
-impl ObjectStorage for MinioStore {
     async fn create_bucket(&self) -> Result<bool> {
         let is_exists = self.is_bucket_exists().await?;
         if !is_exists {
@@ -88,14 +77,34 @@ impl ObjectStorage for MinioStore {
         for path in &self.backup_paths {
             let folder_name = path.split('/').last().unwrap_or("");
             let file_name = format!("{}.tar.gz", folder_name);
-            let full_path = format!("{}/{}", path, file_name);
-            println!("File_name {}, full_path: {}", &file_name, &full_path);
+            let full_path = format!("{}/{}", folder_name, file_name);
+            tracing::info!(
+                name = file_name.as_str(),
+                path = full_path.as_str(),
+                "Uploading file!",
+            );
             let mut p = tokio::fs::File::open(&file_name).await?;
             let response =
-                self.bucket.put_object_stream(&mut p, full_path).await?;
-            println!("Response: {}", response);
+                self.bucket.put_object_stream(&mut p, full_path).await;
+            match response {
+                Ok(r) => tracing::info!(
+                    function = "put_object_stream",
+                    "Put operation response: {}",
+                    r
+                ),
+                Err(e) => tracing::error!("Cannot upload the object: {:#?}", e),
+            };
         }
         Ok(())
+    }
+
+    async fn is_bucket_exists(&self) -> Result<bool> {
+        let (_, response_code) =
+            self.bucket.head_object(self.bucket.name.as_str()).await?;
+        if response_code == 404 {
+            return Ok(false);
+        }
+        Ok(true)
     }
 }
 

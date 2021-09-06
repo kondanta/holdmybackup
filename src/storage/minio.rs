@@ -85,22 +85,15 @@ impl ObjectStorage for MinioStore {
     }
 
     async fn upload(&self) -> anyhow::Result<()> {
+        // path = src, p => tries to open Folder.
         for path in &self.backup_paths {
-            let mut p = tokio::fs::File::open(path).await?;
-            let path_chunks: Vec<&str> = path.split('/').collect();
-            println!("{:#?}", path_chunks);
-            let file_name = format!(
-                "{}/{}",
-                if path_chunks.len() < 2 {
-                    "default"
-                } else {
-                    &path_chunks[path_chunks.len() - 2]
-                },
-                &path.split('/').last().unwrap_or_default()
-            );
-            println!("File Path: {:?}", &path);
+            let folder_name = path.split('/').last().unwrap_or("");
+            let file_name = format!("{}.tar.gz", folder_name);
+            let full_path = format!("{}/{}", path, file_name);
+            println!("File_name {}, full_path: {}", &file_name, &full_path);
+            let mut p = tokio::fs::File::open(&file_name).await?;
             let response =
-                self.bucket.put_object_stream(&mut p, file_name).await?;
+                self.bucket.put_object_stream(&mut p, full_path).await?;
             println!("Response: {}", response);
         }
         Ok(())

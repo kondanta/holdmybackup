@@ -1,3 +1,4 @@
+pub mod backup;
 pub mod config;
 pub mod http;
 pub mod log;

@@ -1,4 +1,5 @@
 pub mod minio;
+mod model;
 
 use async_trait::async_trait;
 use std::sync::{
@@ -17,4 +18,6 @@ pub trait ObjectStorage {
     async fn create_bucket(&self) -> anyhow::Result<bool>;
 
     async fn is_bucket_exists(&self) -> anyhow::Result<bool>;
+
+    async fn list(&self) -> anyhow::Result<String>;
 }

@@ -10,7 +10,6 @@ use {
         Arc,
         Mutex,
     },
-    tokio::runtime::Handle,
 };
 
 #[derive(Debug, Serialize)]
@@ -46,4 +45,12 @@ pub(super) async fn create_backup(
 
     let s = serde_json::to_string(&msg)?;
     Ok(Response::new(Body::from(s)))
+}
+
+pub(super) async fn list_backups(
+    cfg: Arc<Mutex<Config>>
+) -> anyhow::Result<Response<Body>> {
+    let backup = BackupInterface::init(cfg).await;
+    let msg = backup.list().await?;
+    Ok(Response::new(Body::from(msg)))
 }

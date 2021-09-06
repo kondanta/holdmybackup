@@ -25,4 +25,9 @@ impl BackupInterface {
         backup.delete_tar_file().ok();
         Ok(())
     }
+
+    pub async fn list(&self) -> Result<String> {
+        let storage: MinioStore = ObjectStorage::init(self.0.clone())?;
+        storage.list().await
+    }
 }

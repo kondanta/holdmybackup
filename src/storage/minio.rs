@@ -1,4 +1,7 @@
-use super::ObjectStorage;
+use super::{
+    model::ResponseModel,
+    ObjectStorage,
+};
 
 #[allow(unused)]
 use {
@@ -106,6 +109,20 @@ impl ObjectStorage for MinioStore {
         }
         Ok(true)
     }
+
+    async fn list(&self) -> Result<String> {
+        let result = self.bucket.list("/".to_string(), None).await?;
+        let mut data: Vec<String> = Vec::new();
+        for i in result {
+            let r = i.contents;
+            for d in r {
+                data.push(d.key);
+            }
+        }
+        let rmodel = ResponseModel { list: Some(data) };
+        let model: String = serde_json::to_string(&rmodel)?;
+        Ok(model)
+    }
 }
 
 #[cfg(test)]
@@ -137,6 +154,14 @@ mod cfg {
         let r = bucket.upload().await?;
         println!("{:#?}", r);
 
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn list() -> anyhow::Result<()> {
+        let config = Arc::new(Mutex::new(Config::load_config()?));
+        let bucket: MinioStore = MinioStore::init(config)?;
+        let _ = bucket.list().await.unwrap();
         Ok(())
     }
 }

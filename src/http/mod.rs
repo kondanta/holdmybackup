@@ -20,6 +20,7 @@ pub async fn router(
 ) -> anyhow::Result<Response<Body>> {
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/backup") => handler::create_backup(cfg).await,
+        (&Method::GET, "/list") => handler::list_backups(cfg).await,
         _ => {
             let mut not_found = Response::default();
             *not_found.status_mut() = StatusCode::NOT_FOUND;

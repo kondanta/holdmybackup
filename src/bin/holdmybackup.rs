@@ -1,13 +1,7 @@
 use {
     holdmybackup::config::config_file::Config,
+    holdmybackup::http,
     holdmybackup::log,
-    hyper::{
-        Body,
-        Method,
-        Request,
-        Response,
-        StatusCode,
-    },
     std::sync::{
         Arc,
         Mutex,
@@ -39,7 +33,7 @@ async fn main() -> anyhow::Result<()> {
             async move {
                 Ok::<_, hyper::Error>(hyper::service::service_fn(move |req| {
                     let cfg = cfg.clone();
-                    router(req, cfg)
+                    http::router(req, cfg)
                 }))
             }
         });
@@ -58,26 +52,4 @@ async fn shutdown_signal() {
     tokio::signal::ctrl_c()
         .await
         .expect("failed to install ctrl+c signal handler");
-}
-
-async fn router(
-    req: Request<Body>,
-    cfg: Arc<Mutex<Config>>,
-) -> anyhow::Result<Response<Body>> {
-    match (req.method(), req.uri().path()) {
-        (&Method::GET, "/") => show_config(req, cfg).await,
-        _ => {
-            let mut not_found = Response::default();
-            *not_found.status_mut() = StatusCode::NOT_FOUND;
-            Ok(not_found)
-        }
-    }
-}
-
-async fn show_config(
-    _req: Request<Body>,
-    cfg: Arc<Mutex<Config>>,
-) -> anyhow::Result<Response<Body>> {
-    let d = cfg.lock().unwrap().storage.backup_path.clone();
-    Ok(Response::new(Body::from(d)))
 }

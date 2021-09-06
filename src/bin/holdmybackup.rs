@@ -1,5 +1,6 @@
 use {
     holdmybackup::config::config_file::Config,
+    holdmybackup::log,
     hyper::{
         Body,
         Method,
@@ -7,22 +8,10 @@ use {
         Response,
         StatusCode,
     },
-    std::{
-        str::FromStr,
-        sync::{
-            Arc,
-            Mutex,
-        },
+    std::sync::{
+        Arc,
+        Mutex,
     },
-    tracing::{
-        subscriber,
-        Level,
-    },
-    tracing_subscriber::filter::{
-        Directive,
-        EnvFilter,
-    },
-    tracing_subscriber::FmtSubscriber,
 };
 
 #[tokio::main]
@@ -38,14 +27,10 @@ async fn main() -> anyhow::Result<()> {
         Err(e) => tracing::error!("Cannot reload config: {:#?}", e),
     };
 
-    // init_tracer(cfg.clone());
-    let filter = EnvFilter::from_default_env().add_directive(Directive::from(
-        Level::from_str(cfg.clone().lock().unwrap().verbosity.as_str())
-            .unwrap(),
-    ));
-
-    let subscriber = FmtSubscriber::builder().with_env_filter(filter).finish();
-    subscriber::set_global_default(subscriber).unwrap();
+    match log::init_tracer(cfg.clone()) {
+        Ok(()) => tracing::debug!("Tracer initialized."),
+        Err(e) => tracing::error!("Cannot init tracer: {:#?}", e),
+    };
 
     let http_server = {
         let cfg = cfg.clone();

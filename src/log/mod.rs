@@ -19,7 +19,7 @@ use {
 
 pub fn init_tracer(cfg: Arc<Mutex<Config>>) -> Result<()> {
     let filter = EnvFilter::from_default_env().add_directive(Directive::from(
-        Level::from_str(cfg.clone().lock().unwrap().verbosity.as_str())?,
+        Level::from_str(cfg.lock().unwrap().verbosity.as_str())?,
     ));
 
     let subscriber = FmtSubscriber::builder().with_env_filter(filter).finish();

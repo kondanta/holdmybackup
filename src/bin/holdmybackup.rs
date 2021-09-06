@@ -1,5 +1,5 @@
 use {
-    holdmybackup::config::Config,
+    holdmybackup::config::config_file::Config,
     hyper::{
         Body,
         Method,
@@ -7,18 +7,7 @@ use {
         Response,
         StatusCode,
     },
-    notify::{
-        event::{
-            AccessKind,
-            AccessMode,
-        },
-        Error,
-        Event,
-        RecursiveMode,
-        Watcher,
-    },
     std::{
-        path::Path,
         str::FromStr,
         sync::{
             Arc,
@@ -44,37 +33,10 @@ async fn main() -> anyhow::Result<()> {
     let cloned_config = Arc::clone(&cfg);
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 9090));
 
-    let mut watcher = notify::recommended_watcher(
-        move |res: Result<Event, Error>| match res {
-            Ok(e) => {
-                // TODO(taylan): Print event with debug.
-                // println!("Event: {:#?}", &e);
-                if e.kind ==
-                    notify::EventKind::Access(AccessKind::Close(
-                        AccessMode::Write,
-                    ))
-                {
-                    match Config::load_config() {
-                        Ok(new_config) => {
-                            // TODO(taylan): Print this event with
-                            // println!("{:#?}", &new_config);
-                            *cloned_config
-                                .lock()
-                                .expect("Cannot acquire the lock.") = new_config
-                        }
-                        Err(e) => println!("Error reloading config: {:#?}", e),
-                    }
-                }
-            }
-            // TODO(taylan): Print this error with log::error. Or
-            // tracing::error!.
-            Err(e) => println!("Error loading config: {:#?}", e),
-        },
-    )?;
-    watcher.configure(notify::Config::NoticeEvents(true))?;
-    watcher
-        .watch(Path::new("config.yaml"), RecursiveMode::Recursive)
-        .map_err(|e| anyhow::anyhow!("Cannot listen to file {:#?}", e))?;
+    match Config::watch_config_changes(cloned_config) {
+        Ok(()) => tracing::debug!("Config loaded"),
+        Err(e) => tracing::error!("Cannot reload config: {:#?}", e),
+    };
 
     // init_tracer(cfg.clone());
     let filter = EnvFilter::from_default_env().add_directive(Directive::from(

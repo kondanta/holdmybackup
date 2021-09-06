@@ -7,3 +7,4 @@ storage:
 backup:
   strategy: "KeepEverything"
   backup_path: ["."]
+verbosity: info

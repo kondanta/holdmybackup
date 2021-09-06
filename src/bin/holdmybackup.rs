@@ -1,5 +1,3 @@
-use notify::event::AccessKind;
-
 use {
     holdmybackup::config::Config,
     hyper::{
@@ -10,7 +8,10 @@ use {
         StatusCode,
     },
     notify::{
-        event::AccessMode,
+        event::{
+            AccessKind,
+            AccessMode,
+        },
         Error,
         Event,
         RecursiveMode,
@@ -18,11 +19,21 @@ use {
     },
     std::{
         path::Path,
+        str::FromStr,
         sync::{
             Arc,
             Mutex,
         },
     },
+    tracing::{
+        subscriber,
+        Level,
+    },
+    tracing_subscriber::filter::{
+        Directive,
+        EnvFilter,
+    },
+    tracing_subscriber::FmtSubscriber,
 };
 
 #[tokio::main]
@@ -64,6 +75,15 @@ async fn main() -> anyhow::Result<()> {
     watcher
         .watch(Path::new("config.yaml"), RecursiveMode::Recursive)
         .map_err(|e| anyhow::anyhow!("Cannot listen to file {:#?}", e))?;
+
+    // init_tracer(cfg.clone());
+    let filter = EnvFilter::from_default_env().add_directive(Directive::from(
+        Level::from_str(cfg.clone().lock().unwrap().verbosity.as_str())
+            .unwrap(),
+    ));
+
+    let subscriber = FmtSubscriber::builder().with_env_filter(filter).finish();
+    subscriber::set_global_default(subscriber).unwrap();
 
     let http_server = {
         let cfg = cfg.clone();

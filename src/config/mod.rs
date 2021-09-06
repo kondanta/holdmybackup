@@ -41,8 +41,9 @@ pub struct Storage {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
-    pub backup:  Backup,
-    pub storage: Storage,
+    pub backup:    Backup,
+    pub storage:   Storage,
+    pub verbosity: String,
 }
 
 impl Config {

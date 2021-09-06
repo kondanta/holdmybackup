@@ -26,6 +26,7 @@ pub async fn router(
             handler::upload_backup(req, storage).await
         }
         (&Method::POST, "/backup") => handler::create_tarball(cfg).await,
+        (&Method::DELETE, "/delete") => handler::delete_tar_files(cfg).await,
         _ => {
             let mut not_found = Response::default();
             *not_found.status_mut() = StatusCode::NOT_FOUND;

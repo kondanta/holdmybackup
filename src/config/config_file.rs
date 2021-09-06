@@ -42,6 +42,10 @@ pub struct Minio {
     pub access_key: String,
     /// Secret Key
     pub secret_key: String,
+
+    pub endpoint: String,
+
+    pub region: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -124,6 +128,7 @@ storage:
 backup:
     strategy: "KeepEverything"
     backup_path: [ "." ]
+verbosity: debug
     "#;
 
         let d: Config = serde_yaml::from_str(&yaml).unwrap();

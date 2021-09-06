@@ -2,9 +2,11 @@
 storage:
   backup_path: "backups"
   minio:
-    access_key: "ehe"
-    secret_key: "ehe"
+    access_key: "minioadmin"
+    secret_key: "minioadmin"
+    region: ""
+    endpoint: "http://127.0.0.1:9000"
 backup:
   strategy: "KeepEverything"
-  backup_path: ["."]
-verbosity: info
+  backup_path: ["config.yaml", "Cargo.toml", "README.md"]
+verbosity: debug

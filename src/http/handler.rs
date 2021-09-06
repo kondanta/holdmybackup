@@ -1,4 +1,5 @@
 use {
+    crate::backup::Backup,
     crate::config::config_file::Config,
     hyper::{
         Body,
@@ -18,15 +19,27 @@ pub(super) async fn show_config(
     Ok(Response::new(Body::from(d)))
 }
 
-pub(super) async fn perform_backup(
+pub(super) async fn create_tarball(
+    cfg: Arc<Mutex<Config>>
+) -> anyhow::Result<Response<Body>> {
+    let backup = Backup(cfg);
+    let mut s = "Cannot create tarball";
+    let r = backup.create_tarball();
+    if r.is_ok() {
+        s = "Tarball Creation's started."
+    }
+    Ok(Response::new(Body::from(s)))
+}
+
+pub(super) async fn upload_backup(
     _req: Request<Body>,
     bucket: impl crate::storage::ObjectStorage,
 ) -> anyhow::Result<Response<Body>> {
     // Bucket should be initialized before executing this function.
     // So, passing it as an argument into this function?
-    let result = bucket.upload().await?;
+    let result = bucket.upload().await;
     let mut s = "No backup";
-    if result == () {
+    if result.is_ok() {
         s = "Backup operation has triggered!";
     }
     Ok(Response::new(Body::from(s)))

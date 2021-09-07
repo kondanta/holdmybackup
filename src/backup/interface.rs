@@ -10,6 +10,7 @@ use {
     },
 };
 
+#[derive(Debug)]
 pub struct BackupInterface(pub Arc<Mutex<Config>>);
 
 impl BackupInterface {
@@ -17,6 +18,7 @@ impl BackupInterface {
         Self(cfg)
     }
 
+    #[tracing::instrument]
     pub async fn create(&self) -> Result<()> {
         let backup = internal::Backup(self.0.clone());
         backup.create_tarball().ok();
@@ -26,6 +28,7 @@ impl BackupInterface {
         Ok(())
     }
 
+    #[tracing::instrument]
     pub async fn list(&self) -> Result<String> {
         let storage: MinioStore = ObjectStorage::init(self.0.clone())?;
         storage.list().await

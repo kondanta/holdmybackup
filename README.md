@@ -7,6 +7,18 @@ It is a backup tool that creates backups and stores them on an object storage. B
 It is actually a pet project for understanding core concepts of `cloud native` applications. I don't have any
 practicle use case for this app, but one can use this for manage their backups I guess. PR's are welcomed.
 
+## Showcase
+
+### Here's how it looks:
+
+- Create Backup:
+![Creating Backup](https://i.imgur.com/3rQVgec.gif)
+
+- Changing log level
+![Changing Log Level](https://i.imgur.com/PztUv9C.gif)
+
+- Listing available backups
+![Listing Existing Backups](https://i.imgur.com/ajBxGC8.gif)
 
 ## TODO:
 - [x] Reload config without restarting the service.

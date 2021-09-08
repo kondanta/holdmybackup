@@ -1,29 +1,41 @@
 use {
-    crate::config::config_file::Config,
     anyhow::Result,
     std::str::FromStr,
-    std::sync::{
-        Arc,
-        Mutex,
-    },
-    tracing::{
-        subscriber,
-        Level,
-    },
+    tracing::Level,
     tracing_subscriber::filter::{
         Directive,
         EnvFilter,
     },
-    tracing_subscriber::FmtSubscriber,
+    tracing_subscriber::fmt::{
+        format::{
+            DefaultFields,
+            FmtSpan,
+        },
+        SubscriberBuilder,
+    },
+    tracing_subscriber::layer::Layered,
+    tracing_subscriber::Registry,
 };
 
-pub fn init_tracer(cfg: Arc<Mutex<Config>>) -> Result<()> {
-    let filter = EnvFilter::from_default_env().add_directive(Directive::from(
-        Level::from_str(cfg.lock().unwrap().verbosity.as_str())?,
-    ));
+pub type SubscriberType = SubscriberBuilder<
+    DefaultFields,
+    tracing_subscriber::fmt::format::Format,
+    tracing_subscriber::reload::Layer<
+        EnvFilter,
+        Layered<tracing_subscriber::fmt::Layer<Registry>, Registry>,
+    >,
+>;
 
-    let subscriber = FmtSubscriber::builder().with_env_filter(filter).finish();
-    subscriber::set_global_default(subscriber).map_err(|e| {
-        anyhow::anyhow!("Cannot set global default for tracer: {:#?}", e)
-    })
+pub fn init_tracer(log_level: String) -> Result<SubscriberType> {
+    let filter = EnvFilter::from_default_env()
+        .add_directive(Directive::from(Level::from_str(&log_level)?));
+
+    let subscriber = tracing_subscriber::fmt()
+        .with_span_events(FmtSpan::ACTIVE)
+        .with_thread_ids(true)
+        .with_level(true)
+        .with_env_filter(filter)
+        .with_filter_reloading();
+
+    Ok(subscriber)
 }

@@ -22,12 +22,18 @@ async fn main() -> anyhow::Result<()> {
     ));
     let cloned_config = Arc::clone(&cfg);
 
-    match Config::watch_config_changes(cloned_config) {
+    match Config::watch_config_changes(
+        cloned_config,
+        recursive_mode,
+        config_path,
+    ) {
         Ok(()) => tracing::debug!("Config loaded"),
         Err(e) => tracing::error!("Cannot reload config: {:#?}", e),
     };
 
-    match log::init_tracer(cfg.clone()) {
+    let log_writer = log::init_tracer(log_level)?;
+    let handler = log_writer.reload_handle();
+    match log_writer.try_init() {
         Ok(()) => tracing::debug!("Tracer initialized."),
         Err(e) => tracing::error!("Cannot init tracer: {:#?}", e),
     };
@@ -39,13 +45,16 @@ async fn main() -> anyhow::Result<()> {
             );
             std::net::SocketAddr::from(([127, 0, 0, 1], 9090))
         });
+        let handler = handler.clone();
         let cfg = cfg.clone();
         let service = hyper::service::make_service_fn(move |_| {
             let cfg = cfg.clone();
+            let handler = handler.clone();
             async move {
                 Ok::<_, hyper::Error>(hyper::service::service_fn(move |req| {
                     let cfg = cfg.clone();
-                    http::router(req, cfg /* store */)
+                    let handler = handler.clone();
+                    http::router(req, cfg, handler)
                 }))
             }
         });

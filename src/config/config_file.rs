@@ -1,11 +1,12 @@
 use {
     anyhow::Result,
+    crossbeam_channel,
     notify::{
         event::{
             AccessKind,
             AccessMode,
         },
-        INotifyWatcher,
+        RecommendedWatcher,
         RecursiveMode,
         Watcher,
     },
@@ -15,7 +16,6 @@ use {
         io::BufReader,
         path::Path,
         sync::{
-            mpsc::channel,
             Arc,
             Mutex,
         },
@@ -75,9 +75,9 @@ impl Config {
 
     pub fn watch_config_changes(cfg: Arc<Mutex<Config>>) -> Result<()> {
         std::thread::spawn(move || loop {
-            let (tx, rx) = channel();
+            let (tx, rx) = crossbeam_channel::unbounded();
 
-            let mut watcher: INotifyWatcher = Watcher::new(tx)
+            let mut watcher: RecommendedWatcher = RecommendedWatcher::new(tx)
                 .map_err(|e| anyhow::anyhow!("Cannot create watcher: {:#?}", e))
                 .expect("Cannot create Watcher");
 

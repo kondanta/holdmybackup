@@ -8,5 +8,4 @@ storage:
     endpoint: "http://127.0.0.1:9000"
 backup:
   strategy: "KeepEverything"
-  backup_path: ["config.yaml", "Cargo.toml", "README.md"]
-verbosity: debug
+  backup_path: ["src"]

@@ -2,22 +2,27 @@
 
 It is a backup tool that creates backups and stores them on an object storage. By default it uses `minio` but you can use AWS: S3 as well.
 
+## Purpose
+
+It is actually a pet project for understanding core concepts of `cloud native` applications. I don't have any
+practicle use case for this app, but one can use this for manage their backups I guess. PR's are welcomed.
+
 
 ## TODO:
-- Reload config without restarting the service.
-- Abstract Object Storage implementation
-  - Should support atleast AWS: S3 and Minio
-- Backup strategy
+- [x] Reload config without restarting the service.
+- [x] Abstract Object Storage implementation
+   - Should support atleast AWS: S3 and Minio
+     - [x] minio
+     - [] AWS: S3
+- [x] Dynamically change log type
+  - Change log level to one of the available log levels anytime through HTTP PUT request
+  - Available log levels: trace, debug, info, war, error
+- [ ] Backup strategy
   - Remove old [ Keep last N backups ]
   - Don't touch
-- Folder based backups. (like tar -czvf folder/)
-- Multi machine backup trigger
-
-- Tracing `0.1` seems does not support to set_max_level `yet`.
-  - So will do it later.
-
-### Personal Notes
-- MountingConfig map to /etc/config can be used for this case.
-  - However I don;t know we can use configMap as yaml.
-  - https://matthewpalmer.net/kubernetes-app-developer/articles/ultimate-configmap-guide-kubernetes.html
-  - https://www.lpalmieri.com/posts/2020-09-27-zero-to-production-4-are-we-observable-yet/#2-observability
+- [x] Folder based backups. (like tar -czvf folder/)
+- [ ] Export tracing logs using OTeL format.
+  - Jeager
+- [ ] Create instance metrics and export them as well.
+  - Prometheus?
+  - Implement RED

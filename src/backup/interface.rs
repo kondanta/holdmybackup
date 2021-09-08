@@ -23,6 +23,7 @@ impl BackupInterface {
         let backup = internal::Backup(self.0.clone());
         backup.create_tarball().ok();
         let storage: MinioStore = ObjectStorage::init(self.0.clone())?;
+        storage.create_bucket().await.ok();
         storage.upload().await.ok();
         backup.delete_tar_file().ok();
         Ok(())

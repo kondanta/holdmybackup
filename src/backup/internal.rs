@@ -1,6 +1,7 @@
 use {
     crate::config::config_file::Config,
     anyhow::Result,
+    chrono::prelude::*,
     flate2::{
         write::GzEncoder,
         Compression,
@@ -28,7 +29,8 @@ impl Backup {
             );
             return Err(anyhow::anyhow!("File is empty!"));
         }
-        let tar_name = format!("{}.tar.gz", folder_name);
+        let tar_name =
+            format!("{}-{}.tar.gz", folder_name, Utc::now().format("%Y-%m-%d"));
         Ok((tar_name, folder_name.to_string()))
     }
 

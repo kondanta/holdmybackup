@@ -1,15 +1,13 @@
-use super::{
-    model::ResponseModel,
-    ObjectStorage,
-};
-
-#[allow(unused)]
 use {
+    super::{
+        model::ResponseModel,
+        ObjectStorage,
+    },
     crate::config::config_file::Config,
     anyhow::Result,
     async_trait::async_trait,
+    chrono::prelude::*,
     s3::bucket::Bucket,
-    s3::bucket_ops::CreateBucketResponse,
     s3::creds::Credentials,
     s3::region::Region,
     s3::BucketConfiguration,
@@ -18,6 +16,7 @@ use {
         Mutex,
     },
 };
+
 pub struct MinioStore {
     bucket:       s3::bucket::Bucket,
     backup_paths: Vec<String>,
@@ -79,7 +78,11 @@ impl ObjectStorage for MinioStore {
     async fn upload(&self) -> anyhow::Result<()> {
         for path in &self.backup_paths {
             let folder_name = path.split('/').last().unwrap_or("");
-            let file_name = format!("{}.tar.gz", folder_name);
+            let file_name = format!(
+                "{}-{}.tar.gz",
+                folder_name,
+                Utc::now().format("%Y-%m-%d")
+            );
             let full_path = format!("{}/{}", folder_name, file_name);
             tracing::info!(
                 name = file_name.as_str(),

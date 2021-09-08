@@ -13,10 +13,13 @@ use {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let args = Opt::args();
+    let config_path = args.config_path;
+    let recursive_mode = args.recursive_mode;
+    let log_level = args.log_level;
     let cfg = Arc::new(Mutex::new(
         Config::load_config().expect("Cannot parse the config"),
     ));
-    let args = Opt::args();
     let cloned_config = Arc::clone(&cfg);
 
     match Config::watch_config_changes(cloned_config) {

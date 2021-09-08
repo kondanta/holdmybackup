@@ -45,6 +45,7 @@ async fn main() -> anyhow::Result<()> {
             );
             std::net::SocketAddr::from(([127, 0, 0, 1], 9090))
         });
+        tracing::info!("Serving HTTP API through: {}", &addr);
         let handler = handler.clone();
         let cfg = cfg.clone();
         let service = hyper::service::make_service_fn(move |_| {

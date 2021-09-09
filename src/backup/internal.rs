@@ -52,7 +52,13 @@ impl Backup {
             let enc = GzEncoder::new(tar_file, Compression::fast());
             let mut tar = tar::Builder::new(enc);
             tracing::info!("Appending folder content into .tar.gz file");
-            tar.append_dir_all(folder_name, &path)?;
+            let append = tar.append_dir_all(folder_name, &path);
+            match append {
+                Ok(_) => tracing::trace!("Tar file created properly"),
+                Err(e) => {
+                    tracing::error!("Cannot fill tar file's content! {:?}", e)
+                }
+            };
         }
         Ok(())
     }

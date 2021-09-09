@@ -98,7 +98,12 @@ impl ObjectStorage for MinioStore {
                     "Put operation response: {}",
                     r
                 ),
-                Err(e) => tracing::error!("Cannot upload the object: {:#?}", e),
+                Err(e) => {
+                    tracing::error!(
+                        "Cannot upload the object: {}",
+                        e.to_string()
+                    )
+                }
             };
         }
         Ok(())

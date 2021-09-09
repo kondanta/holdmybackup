@@ -16,6 +16,7 @@ use {
         Mutex,
     },
 
+    tokio::runtime::Handle,
     tracing_subscriber::layer::Layered,
     tracing_subscriber::EnvFilter,
     tracing_subscriber::Registry,
@@ -55,15 +56,26 @@ struct FilterRequest {
 pub(super) async fn create_backup(
     cfg: Arc<Mutex<Config>>
 ) -> anyhow::Result<Response<Body>> {
-    let backup = BackupInterface::init(cfg).await;
-    let mut msg = JsonResponse::default();
-    let r = backup.create().await;
-    if r.is_ok() {
-        msg.set_msg("Backup created");
-    }
+    let runtime = Handle::current();
+    let msg = serde_json::to_string(
+        JsonResponse::default().set_msg("Your backup request's been recorded."),
+    )?;
+    runtime.spawn(async move { do_create_backup(cfg).await });
+    Ok(Response::new(Body::from(msg)))
+}
 
-    let s = serde_json::to_string(&msg)?;
-    Ok(Response::new(Body::from(s)))
+async fn do_create_backup(cfg: Arc<Mutex<Config>>) -> anyhow::Result<()> {
+    let backup = BackupInterface::init(cfg).await;
+    let r = backup.create().await;
+
+    match r {
+        Ok(_) => tracing::debug!("Backup created"),
+        Err(e) => {
+            tracing::error!("Cannot create the backup! {}", e.to_string())
+        }
+    };
+
+    Ok(())
 }
 
 pub(super) async fn list_backups(

@@ -55,12 +55,17 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load_config() -> Result<Config, anyhow::Error> {
+    #[tracing::instrument]
+    pub fn load_config() -> Result<Config> {
+        tracing::info!("Loading config...");
         let opt = crate::config::args::Opt::args();
         let f = BufReader::new(File::open(opt.config_path)?);
-        serde_yaml::from_reader(f).map_err(|e| {
+        tracing::debug!("File content: {:?}", &f);
+        let r = serde_yaml::from_reader(f).map_err(|e| {
             anyhow::anyhow!("Cannot parse the config file: {}", e.to_string())
-        })
+        });
+        tracing::trace!("Config content: {:#?}", &r);
+        r
     }
 
     pub fn watch_config_changes(
@@ -68,6 +73,7 @@ impl Config {
         mode: String,
         config_path: String,
     ) -> Result<()> {
+        tracing::info!("Creating config watcher");
         reload_config::watch_changes(
             cfg,
             mode,

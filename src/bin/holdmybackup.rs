@@ -22,20 +22,20 @@ async fn main() -> anyhow::Result<()> {
     ));
     let cloned_config = Arc::clone(&cfg);
 
-    match Config::watch_config_changes(
-        cloned_config,
-        recursive_mode,
-        config_path,
-    ) {
-        Ok(()) => tracing::debug!("Config loaded"),
-        Err(e) => tracing::error!("Cannot reload config: {:#?}", e),
-    };
-
     let log_writer = log::init_tracer(log_level)?;
     let handler = log_writer.reload_handle();
     match log_writer.try_init() {
         Ok(()) => tracing::debug!("Tracer initialized."),
         Err(e) => tracing::error!("Cannot init tracer: {:#?}", e),
+    };
+
+    match Config::watch_config_changes(
+        cloned_config,
+        recursive_mode,
+        config_path,
+    ) {
+        Ok(()) => tracing::debug!("Config loaded."),
+        Err(e) => tracing::error!("Cannot reload config: {:#?}", e),
     };
 
     let http_server = {

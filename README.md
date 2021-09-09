@@ -17,8 +17,13 @@ practicle use case for this app, but one can use this for manage their backups I
 - Changing log level
 ![Changing Log Level](https://i.imgur.com/PztUv9C.gif)
 
+Note that you can use something like this as well: `'{"filter": "trace,reload_config=trace,hyper=info,mio=info,serde_xml_rs=info"}'` because what we actually modify is the EnvFilter.
+
 - Listing available backups
 ![Listing Existing Backups](https://i.imgur.com/ajBxGC8.gif)
+
+- Auto reload config file
+![Load Config](https://i.imgur.com/pZin58E.gif)
 
 ## TODO:
 - [x] Reload config without restarting the service.

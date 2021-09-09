@@ -1189,9 +1189,9 @@ checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
 
 [[package]]
 name = "reload_config"
-version = "0.1.0"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3308d5aebcc67fd1890ce9d245e46eac543c4441b7cf1e2441d61052d2862163"
+checksum = "47b863b9d1e49f3cb2a3284d34102808c163ede98d7d0aa823313899713af55e"
 dependencies = [
  "anyhow",
  "crossbeam-channel",

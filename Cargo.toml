@@ -22,7 +22,7 @@ chrono = "0.4.19"
 rust-s3 = {git = "https://github.com/durch/rust-s3", version = "0.27.0-rc3", features = ["with-tokio"] }
 flate2 = "1.0"
 tar = "0.4"
-reload_config = "0.1"
+reload_config = "0.1.5"
 futures-util = "0.3"
 
 [profile.release]

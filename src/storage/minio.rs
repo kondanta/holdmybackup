@@ -76,7 +76,7 @@ impl ObjectStorage for MinioStore {
         Err(anyhow::anyhow!("Bucket already exists."))
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     async fn upload(&self) -> anyhow::Result<()> {
         for path in &self.backup_paths {
             let folder_name = path.split('/').last().unwrap_or("");

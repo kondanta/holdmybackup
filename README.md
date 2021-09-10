@@ -43,8 +43,8 @@ My favourite filter
   - Remove old [ Keep last N backups ]
   - Don't touch
 - [x] Folder based backups. (like tar -czvf folder/)
-- [ ] Export tracing logs using OTeL format.
-  - Jeager
+- [x] Export tracing logs using OTeL format.
+  - Jeager / ZipKin
 - [ ] Create instance metrics and export them as well.
   - Prometheus?
   - Implement RED

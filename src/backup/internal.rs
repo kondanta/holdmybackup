@@ -41,6 +41,7 @@ impl Backup {
         Ok((tar_name, folder_name.to_string()))
     }
 
+    #[tracing::instrument(skip(self))]
     pub fn create_tarball(&self) -> Result<()> {
         let paths = self.0.lock().unwrap().backup.backup_path.clone();
         tracing::trace!("List of backup canditates: {:?}", paths);

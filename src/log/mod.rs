@@ -89,7 +89,13 @@ pub fn init_tracer(log_level: String) -> Result<HandleType> {
     let handle = subscriber.reload_handle();
     let subscriber = subscriber.finish();
 
-    let _ = subscriber::set_global_default(subscriber.with(telemetry));
+    match subscriber::set_global_default(subscriber.with(telemetry)) {
+        Ok(_) => tracing::debug!("Global subscriber's set."),
+        Err(e) => {
+            tracing::error!("Cannot set global subscriber: {}", e.to_string());
+            std::process::exit(1);
+        }
+    }
 
     Ok(handle)
 }

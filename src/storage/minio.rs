@@ -17,6 +17,7 @@ use {
     },
 };
 
+#[derive(Debug)]
 pub struct MinioStore {
     bucket:       s3::bucket::Bucket,
     backup_paths: Vec<String>,
@@ -75,6 +76,7 @@ impl ObjectStorage for MinioStore {
         Err(anyhow::anyhow!("Bucket already exists."))
     }
 
+    #[tracing::instrument]
     async fn upload(&self) -> anyhow::Result<()> {
         for path in &self.backup_paths {
             let folder_name = path.split('/').last().unwrap_or("");

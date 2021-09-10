@@ -19,6 +19,11 @@ practicle use case for this app, but one can use this for manage their backups I
 
 Note that you can use something like this as well: `'{"filter": "trace,reload_config=trace,hyper=info,mio=info,serde_xml_rs=info"}'` because what we actually modify is the EnvFilter.
 
+My favourite filter
+```
+'{"filter":"trace,reload_config=trace,hyper=error,mio=error,h2=error,tonic=error,serde_xml_rs=error"}'
+```
+
 - Listing available backups
 ![Listing Existing Backups](https://i.imgur.com/ajBxGC8.gif)
 

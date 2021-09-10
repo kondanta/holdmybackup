@@ -14,6 +14,9 @@ crossbeam-channel = "0.5"
 notify = "5.0.0-pre.12"
 tracing = {version = "*"}
 tracing-subscriber = { version = "0.2.20", features = ["env-filter", "fmt"]}
+opentelemetry = {version = "*", features = ["rt-tokio"]}
+opentelemetry-otlp = {version = "*", features = ["metrics"]}
+tracing-opentelemetry = "0.15"
 async-trait = "*"
 hyper = { version = "0.14", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
@@ -24,6 +27,7 @@ flate2 = "1.0"
 tar = "0.4"
 reload_config = "0.1.5"
 futures-util = "0.3"
+
 
 [profile.release]
 opt-level = 3

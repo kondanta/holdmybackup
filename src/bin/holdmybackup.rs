@@ -21,13 +21,7 @@ async fn main() -> anyhow::Result<()> {
         Config::load_config().expect("Cannot parse the config"),
     ));
     let cloned_config = Arc::clone(&cfg);
-
-    let log_writer = log::init_tracer(log_level)?;
-    let handler = log_writer.reload_handle();
-    match log_writer.try_init() {
-        Ok(()) => tracing::debug!("Tracer initialized."),
-        Err(e) => tracing::error!("Cannot init tracer: {:#?}", e),
-    };
+    let handler = log::init_tracer(log_level)?;
 
     match Config::watch_config_changes(
         cloned_config,

@@ -2,6 +2,7 @@ pub(super) mod handler;
 
 use {
     super::config::config_file::Config,
+    crate::log::HandleType,
     hyper::{
         Body,
         Method,
@@ -13,15 +14,8 @@ use {
         Arc,
         Mutex,
     },
-    tracing_subscriber::layer::Layered,
-    tracing_subscriber::EnvFilter,
-    tracing_subscriber::Registry,
 };
 
-pub type HandleType = tracing_subscriber::reload::Handle<
-    EnvFilter,
-    Layered<tracing_subscriber::fmt::Layer<Registry>, Registry>,
->;
 pub async fn router(
     req: Request<Body>,
     cfg: Arc<Mutex<Config>>,

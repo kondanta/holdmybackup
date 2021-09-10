@@ -50,8 +50,14 @@ pub struct Storage {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
-    pub backup:  Backup,
-    pub storage: Storage,
+    pub backup:    Backup,
+    pub storage:   Storage,
+    #[serde(default = "default_otel_addr")]
+    pub otel_addr: String,
+}
+
+fn default_otel_addr() -> String {
+    "http://localhost:4317".to_string()
 }
 
 impl Config {

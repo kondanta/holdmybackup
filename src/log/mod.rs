@@ -34,17 +34,27 @@ use tracing_subscriber::{
     },
     Registry,
 };
+use url::Url;
 
 pub type HandleType = tracing_subscriber::reload::Handle<
     EnvFilter,
     Layered<tracing_subscriber::fmt::Layer<Registry>, Registry>,
 >;
 
-fn init_otlp_exporter() -> TonicExporterBuilder {
+fn init_otlp_exporter(otel_addr: String) -> TonicExporterBuilder {
+    let addr = Url::parse(&otel_addr)
+        .unwrap_or_else(|_| {
+            tracing::error!(
+                "Cannot parse otel http address string. Using the default \
+                 value",
+            );
+            Url::from_str("http://127.0.0.1:4317").unwrap()
+        })
+        .to_string();
+
     opentelemetry_otlp::new_exporter()
         .tonic()
-        // TODO: fetch it from CFG.
-        .with_endpoint("http://localhost:4317")
+        .with_endpoint(addr)
         .with_timeout(std::time::Duration::from_secs(3))
 }
 
@@ -64,10 +74,13 @@ fn init_builder(pipeline: TonicExporterBuilder) -> OtlpTracePipeline {
                 )])),
         )
 }
-pub fn init_tracer(log_level: String) -> Result<HandleType> {
+pub fn init_tracer(
+    log_level: String,
+    otel_addr: String,
+) -> Result<HandleType> {
     global::set_text_map_propagator(TraceContextPropagator::new());
 
-    let exporter = init_otlp_exporter();
+    let exporter = init_otlp_exporter(otel_addr);
     let builder = init_builder(exporter);
 
     let tracer = builder

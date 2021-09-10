@@ -21,7 +21,8 @@ async fn main() -> anyhow::Result<()> {
         Config::load_config().expect("Cannot parse the config"),
     ));
     let cloned_config = Arc::clone(&cfg);
-    let handler = log::init_tracer(log_level)?;
+    let otel_addr = cfg.lock().unwrap().otel_addr.clone();
+    let handler = log::init_tracer(log_level, otel_addr)?;
 
     match Config::watch_config_changes(
         cloned_config,

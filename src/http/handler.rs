@@ -7,10 +7,7 @@ use {
         Response,
         StatusCode,
     },
-    serde::{
-        Deserialize,
-        Serialize,
-    },
+    serde::Deserialize,
     std::sync::{
         Arc,
         Mutex,
@@ -27,27 +24,6 @@ pub type HandleType = tracing_subscriber::reload::Handle<
     Layered<tracing_subscriber::fmt::Layer<Registry>, Registry>,
 >;
 
-#[derive(Debug, Serialize)]
-struct JsonResponse<'a> {
-    response: &'a str,
-}
-
-impl<'a> JsonResponse<'a> {
-    fn default() -> JsonResponse<'a> {
-        JsonResponse {
-            response: "Default Json Response",
-        }
-    }
-
-    fn set_msg(
-        &mut self,
-        s: &'a str,
-    ) -> &Self {
-        self.response = s;
-        self
-    }
-}
-
 #[derive(Debug, Deserialize)]
 struct FilterRequest {
     filter: String,
@@ -57,9 +33,9 @@ pub(super) async fn create_backup(
     cfg: Arc<Mutex<Config>>
 ) -> anyhow::Result<Response<Body>> {
     let runtime = Handle::current();
-    let msg = serde_json::to_string(
-        JsonResponse::default().set_msg("Your backup request's been recorded."),
-    )?;
+    let msg =
+        serde_json::json!({"response": "Your backup request's been recorded."})
+            .to_string();
     runtime.spawn(async move { do_create_backup(cfg).await });
     Ok(Response::new(Body::from(msg)))
 }

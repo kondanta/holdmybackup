@@ -82,8 +82,9 @@ pub(super) async fn list_backups(
     cfg: Arc<Mutex<Config>>
 ) -> anyhow::Result<Response<Body>> {
     let backup = BackupInterface::init(cfg).await;
-    let msg = backup.list().await?;
-    Ok(Response::new(Body::from(msg)))
+    let data = backup.list().await?;
+    let model: String = serde_json::json!({ "response": data }).to_string();
+    Ok(Response::new(Body::from(model)))
 }
 
 pub(super) async fn filter(

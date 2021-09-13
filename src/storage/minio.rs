@@ -1,8 +1,5 @@
 use {
-    super::{
-        model::ResponseModel,
-        ObjectStorage,
-    },
+    super::ObjectStorage,
     crate::config::config_file::Config,
     anyhow::Result,
     async_trait::async_trait,
@@ -120,7 +117,7 @@ impl ObjectStorage for MinioStore {
         Ok(true)
     }
 
-    async fn list(&self) -> Result<String> {
+    async fn list(&self) -> Result<Vec<String>> {
         let result = self.bucket.list("/".to_string(), None).await?;
         let mut data: Vec<String> = Vec::new();
         for i in result {
@@ -129,9 +126,7 @@ impl ObjectStorage for MinioStore {
                 data.push(d.key);
             }
         }
-        let rmodel = ResponseModel { list: Some(data) };
-        let model: String = serde_json::to_string(&rmodel)?;
-        Ok(model)
+        Ok(data)
     }
 }
 

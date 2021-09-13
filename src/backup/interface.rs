@@ -30,7 +30,7 @@ impl BackupInterface {
     }
 
     #[tracing::instrument(skip(self))]
-    pub async fn list(&self) -> Result<String> {
+    pub async fn list(&self) -> Result<Vec<String>> {
         let storage: MinioStore = ObjectStorage::init(self.0.clone())?;
         storage.list().await
     }

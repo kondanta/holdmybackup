@@ -8,4 +8,5 @@ storage:
     endpoint: "http://127.0.0.1:9000"
 backup:
   strategy: "KeepEverything"
-  backup_path: ["src"]
+  backup_path: ["src", "Dockerfile"]
+otel_addr: "asd.asd"

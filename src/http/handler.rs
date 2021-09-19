@@ -13,9 +13,12 @@ use hyper::{
     StatusCode,
 };
 use serde::Deserialize;
-use std::sync::{
-    Arc,
-    Mutex,
+use std::{
+    net::SocketAddr,
+    sync::{
+        Arc,
+        Mutex,
+    },
 };
 use tokio::runtime::Handle;
 use tracing::{
@@ -105,4 +108,9 @@ pub(super) async fn filter(
     }
 }
 
-// pub(super) async fn server_info() -> Result<Response<Body>> {}
+pub(super) async fn server_info(addr: SocketAddr) -> Result<Response<Body>> {
+    debug!("Promting server info");
+    let msg = format!("Serving HTTP server at: {}", addr.to_string());
+    let r = serde_json::json!({ "response": msg });
+    Ok(Response::new(Body::from(r.to_string())))
+}

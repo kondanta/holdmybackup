@@ -46,11 +46,13 @@ async fn main() -> anyhow::Result<()> {
         let service = hyper::service::make_service_fn(move |_| {
             let cfg = cfg.clone();
             let handler = handler.clone();
+            let addr = addr.clone();
             async move {
                 Ok::<_, hyper::Error>(hyper::service::service_fn(move |req| {
                     let cfg = cfg.clone();
                     let handler = handler.clone();
-                    http::router(req, cfg, handler)
+                    let addr = addr.clone();
+                    http::router(req, cfg, handler, addr)
                 }))
             }
         });

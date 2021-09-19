@@ -603,6 +603,7 @@ dependencies = [
  "flate2",
  "futures-util",
  "hyper",
+ "lazy_static",
  "opentelemetry",
  "opentelemetry-otlp",
  "reload_config",

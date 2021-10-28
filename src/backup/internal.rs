@@ -48,7 +48,7 @@ impl Backup {
         for path in paths.iter() {
             tracing::trace!("Currently processing: {}", path);
             tracing::info!("Starting to create tar file for {}", &path);
-            let (tar_name, folder_name) = self.tar_name(&path)?;
+            let (tar_name, folder_name) = self.tar_name(path)?;
             let tar_file = File::create(tar_name)?;
             let enc = GzEncoder::new(tar_file, Compression::fast());
             let mut tar = tar::Builder::new(enc);
